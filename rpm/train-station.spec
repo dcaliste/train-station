@@ -26,9 +26,9 @@ make %{?_smp_mflags}
 rm -rf %{buildroot}
 %make_install
 
-desktop-file-install --delete-original       \
-  --dir %{buildroot}%{_datadir}/applications             \
-   %{buildroot}%{_datadir}/applications/*.desktop
+desktop-file-install --delete-original \
+                     --dir %{buildroot}%{_datadir}/applications \
+                     %{buildroot}%{_datadir}/applications/*.desktop
 
 %files
 %defattr(-,root,root,-)
