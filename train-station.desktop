@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Train station
+Icon=icon-launcher-mad-developer
+Exec=train-station
+X-Nemo-Application-Type=silica-qt5
+Comment=Control trains
+
+[X-Sailjail]
+Permissions=

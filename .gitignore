@@ -1,0 +1,9 @@
+CMakeFiles
+CMakeCache.txt
+Makefile
+*.cmake
+documentation.list
+install_manifest.txt
+RPMS
+train-station
+*autogen
