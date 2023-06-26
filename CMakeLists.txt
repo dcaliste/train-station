@@ -12,7 +12,11 @@ set(CMAKE_CXX_STANDARD 11)
 include(GNUInstallDirs)
 
 set(QT_MIN_VERSION "5.6.0")
-find_package(Qt5 ${QT_MIN_VERSION} COMPONENTS Qml Quick REQUIRED)
+find_package(Qt5 ${QT_MIN_VERSION} COMPONENTS Qml Quick DBus REQUIRED)
+
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+find_package(KF5 COMPONENTS BluezQt REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 

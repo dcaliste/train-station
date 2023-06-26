@@ -7,4 +7,6 @@ X-Nemo-Application-Type=silica-qt5
 Comment=Control trains
 
 [X-Sailjail]
-Permissions=
+Permissions=Privileged;Bluetooth;Connman
+OrganizationName=Train
+ApplicationName=Station

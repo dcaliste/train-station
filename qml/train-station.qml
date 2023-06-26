@@ -20,8 +20,52 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Train.Station 1.0
+import MeeGo.Connman 0.2
 
 ApplicationWindow
 {
-    initialPage: Component { Page { } }
+    initialPage: mainPage
+    allowedOrientations: Orientation.Landscape
+
+    Connections {
+        target: Qt.application
+        onAboutToQuit: btTechonology.powered = btTechonology.poweredOnStart
+    }
+
+    TechnologyModel {
+        id: btTechonology
+        property bool poweredOnStart: false
+        name: "bluetooth"
+        onAvailableChanged: {
+            if (available) {
+                poweredOnStart = powered
+                powered = true
+            }
+        }
+    }
+
+    Component {
+        id: mainPage
+        Page {
+            Column {
+                width: parent.width
+                Label {
+                    text: "operational: " + InterConnect.operational
+                }
+                Label {
+                    text: "BT operational: " + InterConnect.bluetoothOperational
+                }
+                Label {
+                    text: "blocked: " + InterConnect.bluetoothBlocked
+                }
+                Label {
+                    text: "nb connected devices: " + InterConnect.devices.length
+                }
+                Label {
+                    text: "nb tracks: " + InterConnect.tracks.length
+                }
+            }
+        }
+    }
 }
