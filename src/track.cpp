@@ -34,6 +34,11 @@ QString Track::label() const
     return mDefinition.mLabel;
 }
 
+Track::Capabilities Track::capabilities() const
+{
+    return mDefinition.mCapabilities;
+}
+
 Track::Direction Track::direction() const
 {
     return mState.mDirection;
@@ -41,7 +46,7 @@ Track::Direction Track::direction() const
 
 float Track::speed() const
 {
-    return mState.mSpeed;
+    return float(mState.mSpeed) / float(mDefinition.mMaxSpeed);
 }
 
 int Track::count() const
@@ -93,6 +98,18 @@ Track::Definition::Definition(QDataStream &in)
     in.readRawData(label, ln + 1);
     mLabel = QString::fromUtf8(label);
     delete[] label;
+    quint32 maxSpeed = 4096;
+    in >> maxSpeed;
+    mMaxSpeed = qFromBigEndian<quint32>(maxSpeed);
+    quint16 cap = 0;
+    in >> cap;
+    cap = qFromBigEndian<quint16>(cap);
+    if (cap & 1) {
+        mCapabilities |= Track::SPEED_CONTROL;
+    }
+    if (cap & 2) {
+        mCapabilities |= Track::POSITIONING;
+    }
 }
 
 Track::State::State()
@@ -112,7 +129,7 @@ Track::State::State(QDataStream &in)
     }
     qint32 speed;
     in >> speed;
-    mSpeed = float(qFromBigEndian<qint32>(speed)) / 4096.f;
+    mSpeed = qFromBigEndian<qint32>(speed);
     quint32 count;
     in >> count;
     mCount = qFromBigEndian<quint32>(count);

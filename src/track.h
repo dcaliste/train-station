@@ -14,6 +14,7 @@ class Track: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString label READ label CONSTANT);
+    Q_PROPERTY(Capabilities capabilities READ capabilities CONSTANT);
     Q_PROPERTY(Direction direction READ direction NOTIFY directionChanged);
     Q_PROPERTY(float speed READ speed NOTIFY speedChanged);
     Q_PROPERTY(int count READ count NOTIFY countChanged);
@@ -39,6 +40,15 @@ class Track: public QObject
         };
     Q_ENUM(Position);
 
+    enum Capability
+        {
+         NO_CAPABILITY = 0,
+         SPEED_CONTROL = 1,
+         POSITIONING   = 2
+        };
+    Q_DECLARE_FLAGS(Capabilities, Capability)
+    Q_FLAG(Capabilities)
+
     struct Definition
     {
     public:
@@ -48,6 +58,8 @@ class Track: public QObject
         friend class Track;
         int mId = -1;
         QString mLabel;
+        int mMaxSpeed = 4096;
+        Capabilities mCapabilities = Track::NO_CAPABILITY;
     };
 
     struct State
@@ -58,7 +70,7 @@ class Track: public QObject
     private:
         friend class Track;
         Direction mDirection = Track::IDLE;
-        float mSpeed = 0.;
+        int mSpeed = 0;
         int mCount = 0;
         Position mPosition = Track::SOMEWHERE;
         
@@ -70,6 +82,7 @@ class Track: public QObject
 
     int id() const;
     QString label() const;
+    Capabilities capabilities() const;
     Direction direction() const;
     float speed() const;
     int count() const;

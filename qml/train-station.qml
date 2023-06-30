@@ -93,7 +93,7 @@ ApplicationWindow
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.left: backward.right
                             anchors.right: forward.left
-                            label: modelData.label + " | " + modelData.count + " passage(s)"
+                            label: modelData.label + modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : ""
                             value: modelData.speed
                         }
                         Icon {
