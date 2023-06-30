@@ -2,7 +2,7 @@ Name:       train-station
 Summary:    A train controller
 Version:    0.2
 Release:    1
-License:    GPL-3.0-or-later
+License:    GPLv3+
 URL:        https://github.com/dcaliste/train-station
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
@@ -39,3 +39,10 @@ desktop-file-install --delete-original \
 %{_bindir}/*
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
+
+%changelog
+* Fri Jun 30 2023 - Damien Caliste <dcaliste@free.fr> 0.2-1
+- Add a cover page
+
+* Thu Jun 22 2023 - Damien Caliste <dcaliste@free.fr> 0.0.1-1
+- Initial package
