@@ -48,22 +48,69 @@ ApplicationWindow
     Component {
         id: mainPage
         Page {
+            allowedOrientations: Orientation.Landscape
+            enabled: InterConnect.operational
             Column {
-                width: parent.width
-                Label {
-                    text: "operational: " + InterConnect.operational
+                width: parent.width / 3
+                anchors.right: parent.right
+                anchors.rightMargin: Theme.horizontalPageMargin
+                Item {
+                    id: header
+                    width: parent.width
+                    height: btIcon.height
+                    Icon {
+                        id: btIcon
+                        source: "image://theme/icon-m-bluetooth"
+                        highlighted: true
+                        enabled: InterConnect.bluetoothOperational
+                        opacity: enabled ? 1. : Theme.opacityLow
+                    }
+                    Label {
+                        color: Theme.highlightColor
+                        width: parent.width - btIcon.width - anchors.leftMargin - anchors.rightMargin
+                        anchors.left: btIcon.right
+                        anchors.leftMargin: Theme.paddingMedium
+                        anchors.verticalCenter: btIcon.verticalCenter
+                        text: InterConnect.devices.length
+                            ? InterConnect.devices.length + " connected device(s)"
+                            : "no connected device"
+                    }
                 }
-                Label {
-                    text: "BT operational: " + InterConnect.bluetoothOperational
+                Repeater {
+                    model: InterConnect.tracks
+                    delegate: Item {
+                        width: parent.width
+                        height: (Screen.width - header.height) / InterConnect.tracks.length
+                        Icon {
+                            id: backward
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            source: "image://theme/icon-splus-left"
+                            highlighted: modelData.direction == Track.BACKWARD
+                        }
+                        Slider {
+                            enabled: false
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: backward.right
+                            anchors.right: forward.left
+                            label: modelData.label + " | " + modelData.count + " passage(s)"
+                            value: modelData.speed
+                        }
+                        Icon {
+                            id: forward
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            source: "image://theme/icon-splus-right"
+                            highlighted: modelData.direction == Track.FORWARD
+                        }
+                    }
                 }
-                Label {
-                    text: "blocked: " + InterConnect.bluetoothBlocked
-                }
-                Label {
-                    text: "nb connected devices: " + InterConnect.devices.length
-                }
-                Label {
-                    text: "nb tracks: " + InterConnect.tracks.length
+                InfoLabel {
+                    x: 0
+                    height: Screen.width - header.height
+                    verticalAlignment: Text.AlignVCenter
+                    visible: InterConnect.tracks.length == 0
+                    text: "no tracks"
                 }
             }
         }
