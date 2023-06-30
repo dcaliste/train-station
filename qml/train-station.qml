@@ -26,6 +26,7 @@ import MeeGo.Connman 0.2
 ApplicationWindow
 {
     initialPage: mainPage
+    cover: cover
     allowedOrientations: Orientation.Landscape
 
     Connections {
@@ -112,6 +113,35 @@ ApplicationWindow
                     visible: InterConnect.tracks.length == 0
                     text: "no tracks"
                 }
+            }
+        }
+    }
+
+    Component {
+        id: cover
+        CoverBackground {
+            Column {
+                width: parent.width
+                Repeater {
+                    model: InterConnect.tracks
+                    delegate: Item {
+                        width: parent.width
+                        height: cover.height / InterConnect.tracks.length
+                        Slider {
+                            enabled: false
+                            width: parent.width
+                            anchors.verticalCenter: parent.verticalCenter
+                            label: modelData.label + modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : ""
+                            value: modelData.speed
+                        }
+                    }
+                }
+            }
+            InfoLabel {
+                x: 0
+                y: (parent.height - height) / 2.
+                visible: InterConnect.tracks.length == 0
+                text: "no tracks"
             }
         }
     }

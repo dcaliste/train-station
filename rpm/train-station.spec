@@ -1,6 +1,6 @@
 Name:       train-station
 Summary:    A train controller
-Version:    0.0.1
+Version:    0.2
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/dcaliste/train-station
