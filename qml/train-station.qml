@@ -120,18 +120,19 @@ ApplicationWindow
     Component {
         id: cover
         CoverBackground {
+            id: coverBackground
             Column {
                 width: parent.width
                 Repeater {
                     model: InterConnect.tracks
                     delegate: Item {
                         width: parent.width
-                        height: cover.height / InterConnect.tracks.length
+                        height: coverBackground.height / InterConnect.tracks.length
                         Slider {
                             enabled: false
                             width: parent.width
                             anchors.verticalCenter: parent.verticalCenter
-                            label: modelData.label + modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : ""
+                            label: modelData.label + (modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : "")
                             value: modelData.speed
                         }
                     }
