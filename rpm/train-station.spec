@@ -1,6 +1,6 @@
 Name:       train-station
 Summary:    A train controller
-Version:    0.2
+Version:    0.2.1
 Release:    1
 License:    GPLv3+
 URL:        https://github.com/dcaliste/train-station
@@ -41,6 +41,9 @@ desktop-file-install --delete-original \
 %{_datadir}/applications/%{name}.desktop
 
 %changelog
+* Sat Jul 1 2023 - Damien Caliste <dcaliste@free.fr> 0.2.1-1
+- Fix track label
+
 * Fri Jun 30 2023 - Damien Caliste <dcaliste@free.fr> 0.2-1
 - Add a cover page
 
