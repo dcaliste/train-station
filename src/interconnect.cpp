@@ -67,23 +67,34 @@ void InterConnect::initialized(BluezQt::InitManagerJob *job)
     BluezQt::AdapterPtr adapter = usableAdapter();
     if (!adapter) {
         qDebug() << "no powered adapter";
-        connect(this, &BluezQt::Manager::usableAdapterChanged,
+        connect(this, &BluezQt::Manager::adapterAdded,
                 [this] (BluezQt::AdapterPtr adapter) {
-                    connect(adapter.data(), &BluezQt::Adapter::deviceAdded,
-                            this, &InterConnect::autoConnect);
-                    connect(adapter.data(), &BluezQt::Adapter::deviceRemoved,
-                            this, &InterConnect::disconnect);
-                    adapter->startDiscovery();
+                    if (adapter->isPowered()) {
+                        qDebug() << "found an adapter, starting discovery.";
+                        scan(adapter);
+                    }
+                });
+        connect(this, &BluezQt::Manager::adapterChanged,
+                [this] (BluezQt::AdapterPtr adapter) {
+                    if (adapter->isPowered()) {
+                        qDebug() << "adapter is powered, starting discovery.";
+                        scan(adapter);
+                    }
                 });
     } else {
-        connect(adapter.data(), &BluezQt::Adapter::deviceAdded,
-                this, &InterConnect::autoConnect);
-        connect(adapter.data(), &BluezQt::Adapter::deviceRemoved,
-                this, &InterConnect::disconnect);
-        adapter->startDiscovery();
-        for (BluezQt::DevicePtr device : adapter->devices()) {
-            autoConnect(device);
-        }
+        scan(adapter);
+    }
+}
+
+void InterConnect::scan(BluezQt::AdapterPtr adapter)
+{
+    connect(adapter.data(), &BluezQt::Adapter::deviceAdded,
+            this, &InterConnect::autoConnect);
+    connect(adapter.data(), &BluezQt::Adapter::deviceRemoved,
+            this, &InterConnect::disconnect);
+    adapter->startDiscovery();
+    for (BluezQt::DevicePtr device : adapter->devices()) {
+        autoConnect(device);
     }
 }
 

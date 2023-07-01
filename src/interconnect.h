@@ -35,6 +35,7 @@ class InterConnect: public BluezQt::Manager
  private:
     InterConnect(QObject *parent = nullptr);
     void initialized(BluezQt::InitManagerJob *job);
+    void scan(BluezQt::AdapterPtr adapter);
     void autoConnect(BluezQt::DevicePtr device);
     void disconnect(BluezQt::DevicePtr device);
     void readFrame(const QString &device, const Frame &frame);
