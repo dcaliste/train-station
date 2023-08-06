@@ -9,6 +9,8 @@
 
 #include <BluezQt/Manager>
 #include <QQmlEngine>
+#include <QTimer>
+#include <QSet>
 
 #include "frame.h"
 
@@ -39,11 +41,14 @@ class InterConnect: public BluezQt::Manager
     void autoConnect(BluezQt::DevicePtr device);
     void disconnect(BluezQt::DevicePtr device);
     void readFrame(const QString &device, const Frame &frame);
+    void checkPing();
 
     QString mSppUuid;
     QStringList mDevices;
     QHash<QString, Track*> mTracks;
+    QTimer mPingTimer;
     QStringList mDevicesByAddress;
+    QSet<QString> mAliveDevices, mDeadDevices;
 };
 
 #endif

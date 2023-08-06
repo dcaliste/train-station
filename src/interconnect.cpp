@@ -7,6 +7,7 @@
 #include "interconnect.h"
 
 #include <QDebug>
+#include <QDateTime>
 #include <BluezQt/InitManagerJob>
 #include <BluezQt/Adapter>
 #include <BluezQt/Device>
@@ -30,6 +31,8 @@ InterConnect::InterConnect(QObject *parent)
     job->start();
     connect(job, &BluezQt::InitManagerJob::result,
             this, &InterConnect::initialized);
+    mPingTimer.setInterval(3000);
+    connect(&mPingTimer, &QTimer::timeout, this, &InterConnect::checkPing);
 }
 
 InterConnect::~InterConnect()
@@ -49,6 +52,8 @@ void InterConnect::initialized(BluezQt::InitManagerJob *job)
                 mDevices.append(name);
                 emit devicesChanged();
                 mDevicesByAddress.append(device);
+                mAliveDevices.insert(device);
+                mPingTimer.start();
             });
     connect(spp, &Spp::disconnected,
             [this] (const QString &device, const QString &name) {
@@ -63,6 +68,7 @@ void InterConnect::initialized(BluezQt::InitManagerJob *job)
                         }
                     }
                     emit tracksChanged();
+                    mDeadDevices.insert(device);
                 }
             });
     registerProfile(spp);
@@ -135,9 +141,37 @@ void InterConnect::disconnect(BluezQt::DevicePtr device)
     }
 }
 
+void InterConnect::checkPing()
+{
+    qDebug() << "checking ping at" << QDateTime::currentDateTime();
+    for (const QString &device : mDevicesByAddress) {
+        qDebug() << "testing device" << device << "from" << mAliveDevices;
+        QSet<QString>::Iterator it = mAliveDevices.find(device);
+        if (it == mAliveDevices.end()) {
+            disconnect(deviceForAddress(device));
+        } else {
+            mAliveDevices.erase(it);
+        }
+    }
+    QSet<QString>::Iterator it = mDeadDevices.begin();
+    while (it != mDeadDevices.end()) {
+        qDebug() << "trying to reconnect device" << *it;
+        BluezQt::DevicePtr device = deviceForAddress(*it);
+        if (device) autoConnect(device);
+        it = mDeadDevices.erase(it);
+    }
+}
+
 void InterConnect::readFrame(const QString &device, const Frame &frame)
 {
     switch (frame.type()) {
+    case Frame::PING: {
+        qDebug() << "received a ping frame, preparing response" << device;
+        Spp *spp = qobject_cast<Spp*>(sender());
+        if (spp) spp->send(device, frame.pingResponse());
+        mAliveDevices.insert(device);
+        return;
+    }
     case Frame::CAPABILITIES: {
         for (const Track::Definition &definition : frame.trackDefinitions()) {
             Track *track = new Track(definition, this);

@@ -79,3 +79,26 @@ void Spp::dataAvailable()
     emit frameAvailable(socket->property("device").toString(),
                         Frame(socket->readAll()));
 }
+
+void Spp::send(const QString &device, const QByteArray &data) const
+{
+    QHash<QString, QSharedPointer<QLocalSocket>>::ConstIterator it = mSockets.find(device);
+    if (it == mSockets.constEnd()) {
+        qWarning() << "Unknown device" << device;
+        return;
+    }
+
+    qDebug() << "sending data to" << device << data;
+    const char *pt = data.constData();
+    qint64 len = data.length();
+    do {
+        qint64 part = (*it)->write(pt, len);
+        if (part < 0) {
+            qWarning() << "Error sending" << data;
+            return;
+        }
+        pt += part;
+        len -= part;
+    } while (len > 0);
+    qDebug() << "data sent to" << device;
+}

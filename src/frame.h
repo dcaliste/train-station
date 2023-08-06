@@ -17,6 +17,7 @@ class Frame
 public:
     enum Types {
                 UNSUPPORTED,
+                PING,
                 CAPABILITIES,
                 TRACK_STATE
     };
@@ -27,13 +28,16 @@ public:
     Types type() const;
     QList<Track::Definition> trackDefinitions() const;
     Track::State trackState(int *id) const;
+    QByteArray pingResponse() const;
 
 private:
     void read(const QByteArray &data);
+    void readPing(QDataStream &stream);
     void readCapabilities(QDataStream &stream);
     void readTrackState(QDataStream &stream);
 
     Types mType = UNSUPPORTED;
+    quint64 mPingCount = 0;
     QList<Track::Definition> mTrackDefinitions;
     Track::State mTrackState;
     quint32 mTrackId = 0;

@@ -30,6 +30,10 @@ void Frame::read(const QByteArray &data)
     quint32 type = 0;
     stream >> type;
     switch (qFromBigEndian<quint32>(type)) {
+    case PING:
+        mType = PING;
+        readPing(stream);
+        return;
     case CAPABILITIES:
         mType = CAPABILITIES;
         readCapabilities(stream);
@@ -42,6 +46,13 @@ void Frame::read(const QByteArray &data)
         qWarning() << "unknown type from frame" << type;
         mType = UNSUPPORTED;
     }
+}
+
+void Frame::readPing(QDataStream &stream)
+{
+    quint64 count;
+    stream >> count;
+    mPingCount = qFromBigEndian<quint64>(count);
 }
 
 void Frame::readCapabilities(QDataStream &stream)
@@ -75,4 +86,14 @@ Track::State Frame::trackState(int *id) const
         *id = -1;
         return Track::State();
     }
+}
+
+QByteArray Frame::pingResponse() const
+{
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+
+    stream << qToBigEndian<quint32>(quint32(PING)) << qToBigEndian<quint64>(mPingCount);
+
+    return data;
 }
