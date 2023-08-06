@@ -164,11 +164,14 @@ void InterConnect::checkPing()
 
 void InterConnect::readFrame(const QString &device, const Frame &frame)
 {
+    Spp *spp = qobject_cast<Spp*>(sender());
+    if (!spp)
+        return;
+
     switch (frame.type()) {
     case Frame::PING: {
         qDebug() << "received a ping frame, preparing response" << device;
-        Spp *spp = qobject_cast<Spp*>(sender());
-        if (spp) spp->send(device, frame.pingResponse());
+        spp->send(device, frame.pingResponse());
         mAliveDevices.insert(device);
         return;
     }
@@ -183,6 +186,14 @@ void InterConnect::readFrame(const QString &device, const Frame &frame)
             } else {
                 qDebug() << "inserting a new track" << key << track->label();
                 mTracks.insert(key, track);
+                connect(track, &Track::acquireRequest,
+                        [spp, device, track] () {
+                            spp->send(device, Frame::acquireFrame(track->id()));
+                        });
+                connect(track, &Track::releaseRequest,
+                        [spp, device, track] () {
+                            spp->send(device, Frame::releaseFrame(track->id()));
+                        });
             }
         }
         emit tracksChanged();
@@ -191,13 +202,38 @@ void InterConnect::readFrame(const QString &device, const Frame &frame)
     case Frame::TRACK_STATE: {
         int id;
         const Track::State state = frame.trackState(&id);
-        const QString key = device
-            + QString::fromLatin1("::") + QString::number(id);
-        if (!mTracks.contains(key)) {
-            qWarning() << "unknown track" << key;
+        Track *tr = track(device, id);
+        if (!tr) {
+            qWarning() << "unknown track" << device << id;
         } else {
-            qDebug() << "updating state" << key;
-            mTracks[key]->setState(state);
+            qDebug() << "updating state" << device << id;
+            tr->setState(state);
+        }
+        return;
+    }
+    case Frame::ACQUIRE_ACK: {
+        int id;
+        bool ack = frame.ack(&id);
+        Track *tr = track(device, id);
+        if (!tr) {
+            qWarning() << "unknown track" << device << id;
+        } else {
+            qDebug() << "acquire ack" << device << id << ack;
+            if (ack)
+                tr->setLinked(true);
+        }
+        return;
+    }
+    case Frame::RELEASE_ACK: {
+        int id;
+        bool ack = frame.ack(&id);
+        Track *tr = track(device, id);
+        if (!tr) {
+            qWarning() << "unknown track" << device << id;
+        } else {
+            qDebug() << "release ack" << device << id << ack;
+            if (ack)
+                tr->setLinked(false);
         }
         return;
     }
@@ -218,4 +254,15 @@ QVariantList InterConnect::tracks() const
         list.append(QVariant::fromValue(track));
     }
     return list;
+}
+
+Track* InterConnect::track(const QString &device, int id) const
+{
+    const QString key = device
+        + QString::fromLatin1("::") + QString::number(id);
+    if (!mTracks.contains(key)) {
+        return nullptr;
+    } else {
+        return mTracks[key];
+    }
 }

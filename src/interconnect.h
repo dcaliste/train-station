@@ -42,6 +42,7 @@ class InterConnect: public BluezQt::Manager
     void disconnect(BluezQt::DevicePtr device);
     void readFrame(const QString &device, const Frame &frame);
     void checkPing();
+    Track* track(const QString &device, int id) const;
 
     QString mSppUuid;
     QStringList mDevices;

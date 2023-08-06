@@ -87,6 +87,25 @@ void Track::setState(const State &state)
     }
 }
 
+void Track::acquire()
+{
+    emit acquireRequest();
+}
+
+void Track::release()
+{
+    emit releaseRequest();
+}
+
+void Track::setLinked(bool linked)
+{
+    if (linked == mLinked)
+        return;
+
+    mLinked = linked;
+    emit linkedChanged();
+}
+
 Track::Definition::Definition()
 {
 }

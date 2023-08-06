@@ -19,5 +19,4 @@ target_link_libraries(train-station
   PkgConfig::SAILFISHAPP
   )
 
-install(TARGETS train-station
-  DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS train-station DESTINATION ${CMAKE_INSTALL_BINDIR})

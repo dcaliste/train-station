@@ -41,7 +41,7 @@ desktop-file-install --delete-original \
 %{_datadir}/applications/%{name}.desktop
 
 %changelog
-* Sat Jul 1 2023 - Damien Caliste <dcaliste@free.fr> 0.2.1-1
+* Sat Jul 1 2023 - Damien Caliste <dcaliste@free.fr> 0.2.2-1
 - Fix cover layout
 - Fix connection issues on unpowered adapters.
 

@@ -42,6 +42,14 @@ void Frame::read(const QByteArray &data)
         mType = TRACK_STATE;
         readTrackState(stream);
         return;
+    case ACQUIRE_ACK:
+        mType = ACQUIRE_ACK;
+        readAcquireAck(stream);
+        return;
+    case RELEASE_ACK:
+        mType = RELEASE_ACK;
+        readReleaseAck(stream);
+        return;
     default:
         qWarning() << "unknown type from frame" << type;
         mType = UNSUPPORTED;
@@ -72,6 +80,22 @@ void Frame::readTrackState(QDataStream &stream)
     mTrackState = Track::State(stream);
 }
 
+void Frame::readAcquireAck(QDataStream &stream)
+{
+    quint32 id, ack;
+    stream >> id >> ack;
+    mTrackId = qFromBigEndian<quint32>(id);
+    mAck = qFromBigEndian<quint32>(ack);
+}
+
+void Frame::readReleaseAck(QDataStream &stream)
+{
+    quint32 id, ack;
+    stream >> id >> ack;
+    mTrackId = qFromBigEndian<quint32>(id);
+    mAck = qFromBigEndian<quint32>(ack);
+}
+
 QList<Track::Definition> Frame::trackDefinitions() const
 {
     return mType == CAPABILITIES ? mTrackDefinitions : QList<Track::Definition>();
@@ -96,4 +120,31 @@ QByteArray Frame::pingResponse() const
     stream << qToBigEndian<quint32>(quint32(PING)) << qToBigEndian<quint64>(mPingCount);
 
     return data;
+}
+
+QByteArray Frame::acquireFrame(int id)
+{
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+
+    stream << qToBigEndian<quint32>(quint32(ACQUIRE_TRACK)) << qToBigEndian<int>(id);
+
+    return data;
+}
+
+QByteArray Frame::releaseFrame(int id)
+{
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+
+    stream << qToBigEndian<quint32>(quint32(RELEASE_TRACK)) << qToBigEndian<int>(id);
+
+    return data;
+}
+
+bool Frame::ack(int *id) const
+{
+    if ((mType == ACQUIRE_ACK || mType == RELEASE_ACK) && id)
+        *id = mTrackId;
+    return mAck;
 }

@@ -87,7 +87,11 @@ ApplicationWindow
                         MenuItem {
                             text: modelData.linked ? "Release track control" : "Control track"
                             onClicked: {
-                                console.log("Acquire track", modelData.label)
+                                if (linked) {
+                                    modelData.release()
+                                } else {
+                                    modelData.acquire()
+                                }
                             }
                         }
                     }
@@ -103,6 +107,7 @@ ApplicationWindow
                         id: backward
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
+                        anchors.leftMargin: Theme.paddingSmall
                         source: "image://theme/icon-splus-left"
                         highlighted: modelData.direction == Track.BACKWARD
                     }
@@ -110,6 +115,7 @@ ApplicationWindow
                         enabled: false
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
+                        anchors.leftMargin: Theme.paddingSmall
                         anchors.right: parent.right
                         anchors.rightMargin: Theme.horizontalPageMargin
                         label: modelData.label + (modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : "")
@@ -130,7 +136,7 @@ ApplicationWindow
                 width: parent.width / 3
                 height: Screen.width
                 verticalAlignment: Text.AlignVCenter
-                visible: InterConnect.tracks.length == 0
+                visible: trackList.model.length == 0
                 text: "no tracks"
             }
         }

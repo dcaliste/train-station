@@ -77,6 +77,7 @@ class Track: public QObject
         
     };
 
+ public:
     Track(QObject *parent = nullptr);
     Track(const Definition &definition, QObject *parent = nullptr);
     ~Track();
@@ -92,6 +93,10 @@ class Track: public QObject
 
     void setState(const State &state);
 
+    Q_INVOKABLE void acquire();
+    Q_INVOKABLE void release();
+    void setLinked(bool linked);
+
  signals:
     void directionChanged();
     void speedChanged();
@@ -99,11 +104,14 @@ class Track: public QObject
     void positionChanged();
     void linkedChanged();
 
+    void acquireRequest();
+    void releaseRequest();
+
  private:
     Definition mDefinition;
     State mState;
     bool mLinked = false;
 };
-Q_DECLARE_METATYPE(Track*);
+//Q_DECLARE_METATYPE(Track*);
 
 #endif
