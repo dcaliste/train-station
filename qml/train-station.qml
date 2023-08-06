@@ -51,13 +51,12 @@ ApplicationWindow
         Page {
             allowedOrientations: Orientation.Landscape
             enabled: InterConnect.operational
-            Column {
-                width: parent.width / 3
-                anchors.right: parent.right
-                anchors.rightMargin: Theme.horizontalPageMargin
-                Item {
-                    id: header
-                    width: parent.width
+            SilicaListView {
+                id: trackList
+                anchors.fill: parent
+                header: Item {
+                    x: trackList.width - width
+                    width: trackList.width / 3
                     height: btIcon.height
                     Icon {
                         id: btIcon
@@ -77,42 +76,62 @@ ApplicationWindow
                             : "no connected device"
                     }
                 }
-                Repeater {
-                    model: InterConnect.tracks
-                    delegate: Item {
-                        width: parent.width
-                        height: (Screen.width - header.height) / InterConnect.tracks.length
-                        Icon {
-                            id: backward
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.left: parent.left
-                            source: "image://theme/icon-splus-left"
-                            highlighted: modelData.direction == Track.BACKWARD
-                        }
-                        Slider {
-                            enabled: false
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.left: backward.right
-                            anchors.right: forward.left
-                            label: modelData.label + (modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : "")
-                            value: modelData.speed
-                        }
-                        Icon {
-                            id: forward
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.right: parent.right
-                            source: "image://theme/icon-splus-right"
-                            highlighted: modelData.direction == Track.FORWARD
+                model: InterConnect.tracks
+                delegate: ListItem {
+                    x: trackList.width - width
+                    width: trackList.width / 3
+                    contentHeight: (Screen.width - trackList.headerItem.height) / 4
+                    menu: ContextMenu {
+                        width: trackList.width / 3
+                        x: 0
+                        MenuItem {
+                            text: modelData.linked ? "Release track control" : "Control track"
+                            onClicked: {
+                                console.log("Acquire track", modelData.label)
+                            }
                         }
                     }
+                    Icon {
+                        anchors.top: parent.top
+                        anchors.topMargin: Theme.paddingSmall / 2
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        source: "image://theme/icon-s-edit"
+                        visible: modelData.linked
+                        highlighted: parent.highlighted
+                    }
+                    Icon {
+                        id: backward
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        source: "image://theme/icon-splus-left"
+                        highlighted: modelData.direction == Track.BACKWARD
+                    }
+                    Slider {
+                        enabled: false
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.rightMargin: Theme.horizontalPageMargin
+                        label: modelData.label + (modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : "")
+                        value: modelData.speed
+                    }
+                    Icon {
+                        id: forward
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        anchors.rightMargin: Theme.horizontalPageMargin
+                        source: "image://theme/icon-splus-right"
+                        highlighted: modelData.direction == Track.FORWARD
+                    }
                 }
-                InfoLabel {
-                    x: 0
-                    height: Screen.width - header.height
-                    verticalAlignment: Text.AlignVCenter
-                    visible: InterConnect.tracks.length == 0
-                    text: "no tracks"
-                }
+            }
+            InfoLabel {
+                x: parent.width - width
+                width: parent.width / 3
+                height: Screen.width
+                verticalAlignment: Text.AlignVCenter
+                visible: InterConnect.tracks.length == 0
+                text: "no tracks"
             }
         }
     }

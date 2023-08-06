@@ -59,6 +59,11 @@ Track::Position Track::position() const
     return mState.mPosition;
 }
 
+bool Track::linked() const
+{
+    return mLinked;
+}
+
 void Track::setState(const State &state)
 {
     State old = mState;

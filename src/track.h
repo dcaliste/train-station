@@ -19,6 +19,7 @@ class Track: public QObject
     Q_PROPERTY(float speed READ speed NOTIFY speedChanged);
     Q_PROPERTY(int count READ count NOTIFY countChanged);
     Q_PROPERTY(Position position READ position NOTIFY positionChanged);
+    Q_PROPERTY(bool linked READ linked NOTIFY linkedChanged);
 
  public:
     enum Direction
@@ -87,6 +88,7 @@ class Track: public QObject
     float speed() const;
     int count() const;
     Position position() const;
+    bool linked() const;
 
     void setState(const State &state);
 
@@ -95,10 +97,12 @@ class Track: public QObject
     void speedChanged();
     void countChanged();
     void positionChanged();
+    void linkedChanged();
 
  private:
     Definition mDefinition;
     State mState;
+    bool mLinked = false;
 };
 Q_DECLARE_METATYPE(Track*);
 
