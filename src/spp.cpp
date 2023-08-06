@@ -42,6 +42,7 @@ void Spp::newConnection(BluezQt::DevicePtr device,
 {
     if (mSockets.contains(device->address())) {
         qWarning() << "device already connected" << device->address();
+        request.cancel();
         return;
     }
     QSharedPointer<QLocalSocket> socket = createSocket(fd);
@@ -55,14 +56,21 @@ void Spp::newConnection(BluezQt::DevicePtr device,
             this, &Spp::dataAvailable);
     mSockets.insert(device->address(), socket);
     emit connected(device->address(), device->name());
+    request.accept();
+}
+
+void Spp::release()
+{
+    qDebug() << "releasing";
 }
 
 void Spp::requestDisconnection(BluezQt::DevicePtr device,
                                const BluezQt::Request<> &request)
 {
-    qDebug() << "disconnecting" << device->address() << device->name();
+    qDebug() << "disconnecting profile" << device->address() << device->name();
     mSockets.remove(device->address());
     emit disconnected(device->address(), device->name());
+    request.accept();
 }
 
 void Spp::dataAvailable()

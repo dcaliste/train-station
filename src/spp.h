@@ -29,6 +29,7 @@ class Spp: public BluezQt::Profile
                        const BluezQt::Request<> &request) override;
     void requestDisconnection(BluezQt::DevicePtr device,
                               const BluezQt::Request<> &request) override;
+    void release() override;
 
  signals:
     void connected(const QString &device, const QString &name);
