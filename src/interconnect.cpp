@@ -45,21 +45,25 @@ void InterConnect::initialized(BluezQt::InitManagerJob *job)
             this, &InterConnect::readFrame);
     connect(spp, &Spp::connected,
             [this] (const QString &device, const QString &name) {
-                qDebug() << "connected to" << name;
+                qDebug() << "profile connected" << device << name;
                 mDevices.append(name);
                 emit devicesChanged();
+                mDevicesByAddress.append(device);
             });
     connect(spp, &Spp::disconnected,
             [this] (const QString &device, const QString &name) {
-                qDebug() << "disconnected from" << name;
-                mDevices.removeAll(device);
-                emit devicesChanged();
-                for (const QString & key : mTracks.keys()) {
-                    if (key.startsWith(device)) {
-                        mTracks.remove(key);
+                qDebug() << "profile disconnected" << device << name;
+                if (mDevicesByAddress.contains(device)) {
+                    mDevicesByAddress.removeAll(device);
+                    mDevices.removeAll(name);
+                    emit devicesChanged();
+                    for (const QString &key : mTracks.keys()) {
+                        if (key.startsWith(device)) {
+                            mTracks.remove(key);
+                        }
                     }
+                    emit tracksChanged();
                 }
-                emit tracksChanged();
             });
     registerProfile(spp);
     mSppUuid = spp->uuid();
@@ -105,28 +109,29 @@ void InterConnect::autoConnect(BluezQt::DevicePtr device)
     if (device->uuids().contains(mSppUuid) || device->name() == "ESP train") {
         BluezQt::PendingCall *call = device->connectProfile(mSppUuid);
         connect(call, &BluezQt::PendingCall::finished,
-                [this, device] (BluezQt::PendingCall *call) {
+                [device] (BluezQt::PendingCall *call) {
                     if (call->error() != BluezQt::PendingCall::NoError) {
-                        qWarning() << device->name() << call->errorText();
-                        return;
+                        qWarning() << device->name() << "auto connect error:" << call->errorText();
                     }
-                    call->deleteLater();
+                    //call->deleteLater();
+                    qDebug() << "connected to" << device->name();
                 });
     }
 }
 
 void InterConnect::disconnect(BluezQt::DevicePtr device)
 {
-    qDebug() << device->address() << device->name();
-    if (mDevices.contains(device->address())) {
-        mDevices.removeAll(device->address());
-        emit devicesChanged();
-        for (const QString &key : mTracks.keys()) {
-            if (key.startsWith(device->address())) {
-                mTracks.remove(key);
-            }
-        }
-        emit tracksChanged();
+    if (mDevicesByAddress.contains(device->address())) {
+        qDebug() << "request disconnection" << device->address() << device->name();
+        BluezQt::PendingCall *call = device->disconnectProfile(mSppUuid);
+        connect(call, &BluezQt::PendingCall::finished,
+                [device] (BluezQt::PendingCall *call) {
+                    if (call->error() != BluezQt::PendingCall::NoError) {
+                        qWarning() << device->name() << "disconnection error:" << call->errorText();
+                    }
+                    //call->deleteLater();
+                    qDebug() << "disconnected from" << device->name();
+                });
     }
 }
 

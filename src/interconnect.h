@@ -43,6 +43,7 @@ class InterConnect: public BluezQt::Manager
     QString mSppUuid;
     QStringList mDevices;
     QHash<QString, Track*> mTracks;
+    QStringList mDevicesByAddress;
 };
 
 #endif
