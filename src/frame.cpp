@@ -127,7 +127,7 @@ QByteArray Frame::acquireFrame(int id)
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
 
-    stream << qToBigEndian<quint32>(quint32(ACQUIRE_TRACK)) << qToBigEndian<int>(id);
+    stream << qToBigEndian<quint32>(quint32(ACQUIRE_TRACK)) << qToBigEndian<quint32>(id);
 
     return data;
 }
@@ -137,7 +137,7 @@ QByteArray Frame::releaseFrame(int id)
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
 
-    stream << qToBigEndian<quint32>(quint32(RELEASE_TRACK)) << qToBigEndian<int>(id);
+    stream << qToBigEndian<quint32>(quint32(RELEASE_TRACK)) << qToBigEndian<quint32>(id);
 
     return data;
 }
@@ -147,4 +147,15 @@ bool Frame::ack(int *id) const
     if ((mType == ACQUIRE_ACK || mType == RELEASE_ACK) && id)
         *id = mTrackId;
     return mAck;
+}
+
+QByteArray Frame::speedFrame(int id, int speed)
+{
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+
+    stream << qToBigEndian<quint32>(quint32(SPEED_COMMAND));
+    stream << qToBigEndian<quint32>(id) << qToBigEndian<qint32>(speed);
+
+    return data;
 }

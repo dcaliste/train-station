@@ -194,6 +194,10 @@ void InterConnect::readFrame(const QString &device, const Frame &frame)
                         [spp, device, track] () {
                             spp->send(device, Frame::releaseFrame(track->id()));
                         });
+                connect(track, &Track::speedRequest,
+                        [spp, device, track] (int speed) {
+                            spp->send(device, Frame::speedFrame(track->id(), speed));
+                        });
             }
         }
         emit tracksChanged();

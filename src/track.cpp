@@ -12,12 +12,18 @@
 Track::Track(QObject *parent)
     : QObject(parent)
 {
+    mDelay.setInterval(100);
+    mDelay.setSingleShot(true);
+    connect(&mDelay, &QTimer::timeout, this, &Track::emitCommand);
 }
 
 Track::Track(const Definition &definition, QObject *parent)
     : QObject(parent)
     , mDefinition(definition)
 {
+    mDelay.setInterval(100);
+    mDelay.setSingleShot(true);
+    connect(&mDelay, &QTimer::timeout, this, &Track::emitCommand);
 }
 
 Track::~Track()
@@ -104,6 +110,27 @@ void Track::setLinked(bool linked)
 
     mLinked = linked;
     emit linkedChanged();
+}
+
+void Track::requestSpeed(float speed)
+{
+    if (!mLinked)
+        return;
+
+    if (speed == mSpeedRequest)
+        return;
+
+    mSpeedRequest = speed;
+    if (!mDelay.isActive()) {
+        emitCommand();
+        mDelay.start();
+    }
+}
+
+void Track::emitCommand()
+{
+    emit speedRequest(int(mSpeedRequest * mDefinition.mMaxSpeed));
+    mDelay.stop();
 }
 
 Track::Definition::Definition()

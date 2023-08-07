@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QDataStream>
+#include <QTimer>
 
 class Track: public QObject
 {
@@ -96,6 +97,7 @@ class Track: public QObject
     Q_INVOKABLE void acquire();
     Q_INVOKABLE void release();
     void setLinked(bool linked);
+    Q_INVOKABLE void requestSpeed(float speed);
 
  signals:
     void directionChanged();
@@ -106,12 +108,16 @@ class Track: public QObject
 
     void acquireRequest();
     void releaseRequest();
+    void speedRequest(int speed);
 
  private:
+    void emitCommand();
+
     Definition mDefinition;
     State mState;
     bool mLinked = false;
+    float mSpeedRequest = 0.;
+    QTimer mDelay;
 };
-//Q_DECLARE_METATYPE(Track*);
 
 #endif

@@ -38,6 +38,7 @@ public:
 
     static QByteArray acquireFrame(int id);
     static QByteArray releaseFrame(int id);
+    static QByteArray speedFrame(int id, int speed);
 
 private:
     void read(const QByteArray &data);

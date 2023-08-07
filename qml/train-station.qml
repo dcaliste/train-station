@@ -78,6 +78,7 @@ ApplicationWindow
                 }
                 model: InterConnect.tracks
                 delegate: ListItem {
+                    readonly property bool edited: slider.track == modelData
                     x: trackList.width - width
                     width: trackList.width / 3
                     contentHeight: (Screen.width - trackList.headerItem.height) / 4
@@ -87,12 +88,17 @@ ApplicationWindow
                         MenuItem {
                             text: modelData.linked ? "Release track control" : "Control track"
                             onClicked: {
-                                if (linked) {
+                                if (modelData.linked) {
                                     modelData.release()
                                 } else {
                                     modelData.acquire()
                                 }
                             }
+                        }
+                    }
+                    onClicked: {
+                        if (modelData.linked) {
+                            slider.track = edited ? null : modelData
                         }
                     }
                     Icon {
@@ -101,7 +107,7 @@ ApplicationWindow
                         anchors.horizontalCenter: parent.horizontalCenter
                         source: "image://theme/icon-s-edit"
                         visible: modelData.linked
-                        highlighted: parent.highlighted
+                        highlighted: parent.highlighted || edited
                     }
                     Icon {
                         id: backward
@@ -118,6 +124,8 @@ ApplicationWindow
                         anchors.leftMargin: Theme.paddingSmall
                         anchors.right: parent.right
                         anchors.rightMargin: Theme.horizontalPageMargin
+                        leftMargin: backward.width + Theme.paddingSmall
+                        rightMargin: forward.width + Theme.paddingSmall
                         label: modelData.label + (modelData.capabilities & Track.POSITIONING ? " | " + modelData.count + " passage(s)" : "")
                         value: modelData.speed
                     }
@@ -138,6 +146,51 @@ ApplicationWindow
                 verticalAlignment: Text.AlignVCenter
                 visible: trackList.model.length == 0
                 text: "no tracks"
+            }
+            Slider {
+                id: slider
+
+                property QtObject track
+                onTrackChanged: {
+                    if (track) {
+                        value = track.direction == Track.FORWARD ? track.speed : -track.speed
+                    }
+                }
+
+                anchors.bottom: parent.bottom
+                width: 2 * parent.width / 3
+                enabled: track !== null
+                opacity: enabled ? 1. : Theme.opacityLow
+                label: enabled ? track.label : "no controlled track"
+                minimumValue: -1.
+                valueText: {
+                    if (Math.abs(sliderValue) > 0.05) {
+                        return Math.round(sliderValue * 100.) + " %"
+                    } else {
+                        return "stopped"
+                    }
+                }
+                onValueChanged: {
+                    if (track) {
+                        track.requestSpeed(value)
+                    }
+                }
+
+                Binding {
+                    target: slider._progressBarItem
+                    property: "width"
+                    value: 0.5 * ((slider.sliderValue < 0 ? 2. : 1.) * slider._progressBarItem.height + Math.abs(slider.sliderValue) * (slider._backgroundItem.width - slider._progressBarItem.height))
+                }
+                Binding {
+                    target: slider._progressBarItem
+                    property: "x"
+                    value: slider._backgroundItem.x + 0.5 * slider._backgroundItem.width - (slider.sliderValue < 0 ? (slider._progressBarItem.width - 0.5 * slider._progressBarItem.height) : 0.)
+                }
+                Binding {
+                    target: slider._progressBarItem
+                    property: "visible"
+                    value: slider.sliderValue != 0.
+                }
             }
         }
     }
