@@ -156,6 +156,7 @@ ApplicationWindow
                         value = track.direction == Track.FORWARD ? track.speed : -track.speed
                     }
                 }
+                property float speedValue: Math.abs(sliderValue) > 0.1 ? sliderValue : 0.
 
                 anchors.bottom: parent.bottom
                 width: 2 * parent.width / 3
@@ -164,32 +165,32 @@ ApplicationWindow
                 label: enabled ? track.label : "no controlled track"
                 minimumValue: -1.
                 valueText: {
-                    if (Math.abs(sliderValue) > 0.05) {
-                        return Math.round(sliderValue * 100.) + " %"
+                    if (speedValue != 0.) {
+                        return Math.round(speedValue * 100.) + " %"
                     } else {
                         return "stopped"
                     }
                 }
                 onValueChanged: {
                     if (track) {
-                        track.requestSpeed(value)
+                        track.requestSpeed(speedValue)
                     }
                 }
 
                 Binding {
                     target: slider._progressBarItem
                     property: "width"
-                    value: 0.5 * ((slider.sliderValue < 0 ? 2. : 1.) * slider._progressBarItem.height + Math.abs(slider.sliderValue) * (slider._backgroundItem.width - slider._progressBarItem.height))
+                    value: 0.5 * ((slider.speedValue < 0 ? 2. : 1.) * slider._progressBarItem.height + Math.abs(slider.speedValue) * (slider._backgroundItem.width - slider._progressBarItem.height))
                 }
                 Binding {
                     target: slider._progressBarItem
                     property: "x"
-                    value: slider._backgroundItem.x + 0.5 * slider._backgroundItem.width - (slider.sliderValue < 0 ? (slider._progressBarItem.width - 0.5 * slider._progressBarItem.height) : 0.)
+                    value: slider._backgroundItem.x + 0.5 * slider._backgroundItem.width - (slider.speedValue < 0 ? (slider._progressBarItem.width - 0.5 * slider._progressBarItem.height) : 0.)
                 }
                 Binding {
                     target: slider._progressBarItem
                     property: "visible"
-                    value: slider.sliderValue != 0.
+                    value: slider.speedValue != 0.
                 }
             }
         }
